@@ -1,0 +1,138 @@
+{% extends 'base.html' %}
+
+
+{% block content %}
+
+<div class="row">
+    <div class="col-md-6">
+        <div class="card mx-auto" style="width: 80rem;">
+            <div class="card-body">
+
+                <h5 class="card-title mb-3">{{ticket.title}}</h5>
+                <p class="card-text">{{ticket.description}}</p>
+                
+                <div class="row">
+                    <div class="col">
+                        <b>Ticket Number:</b> {{ticket.ticket_number}}
+                    </div>
+
+                    
+                    {% if ticket.ticket_status == 'Active' %}
+                    <div class="col">
+                        <b>Status:</b> <span class="badge bg-info">Active</span>
+                    </div>
+
+                    {% elif ticket.ticket_status == 'Pending' %}
+                    <div class="col">
+                        <b>Status:</b> <span class="badge bg-warning">Pending</span>
+                    </div>
+                    {% elif ticket.ticket_status == 'Completed' %}
+                    <div class="col">
+                        <b>Resolved:</b> <span class="badge bg-success">Completed</span> 
+                    </div>
+                    {% endif %}
+                </div>
+
+                <div class="row">
+                    <div class="col">
+                        <b>Date created:</b> {{ticket.date_created}}
+                    </div>
+                    <div class="col">
+                        <b>Accepted Date:</b> {{ticket.accepted_date}}
+                    </div>
+                </div>
+                <div class="row">
+
+                    <div class="col">
+                        <b>Reported by:</b> {{ticket.created_by}}
+                    </div>
+
+                    <div class="col">
+                        <b>Assigned To:</b> {{ticket.assigned_to}}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<br>
+
+{% if request.user.is_engineer and not ticket.is_resolved %}
+
+<a href="#" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#Modal">Confirm resolution</a>
+
+<!-- Modal -->
+<div class="modal fade" id="Modal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalLabel">Are you sure about the resolution?</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>    
+      <div class="modal-body">
+        Are you sure you want to close this ticket?
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+        <!-- The action button that performs the close ticket operation -->
+        <a href="{% url 'close-ticket' ticket.pk %}" class="btn btn-primary">Confirm resolution</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<br>
+<br>
+
+{% endif %} 
+
+{% if request.user.is_customer %}
+
+<a href="{% url 'update-ticket' ticket.pk %}" class="btn btn-info">Update Ticket</a>
+
+<br>
+<br>
+
+{% endif %}
+  
+
+
+
+
+<div class="row">
+    <div class="col-md-6">
+        <div class="card mx-auto" style="width: 80rem;">
+            <div class="card-body">
+
+                <h5 class="card-title mb-3">All Tickets by {{ticket.created_by}}</h5>
+
+                <div class="container my-5">
+                    <table class="table table-bordered" style="width: 75rem; margin: 0 auto;">
+                        <thead>
+                            <tr>
+                                <th scope="col" style="text-align: center;">Ticket Title</th>
+                                <th scope="col" style="text-align: center;">Ticket Status</th>
+                                <th scope="col" style="text-align: center; width: 8rem;">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for ticket in ticket_per_user %}
+                                <tr>
+                                    <td style="text-align: center;">{{ ticket.title }}</td>
+                                    <td style="text-align: center;">{{ ticket.ticket_status }}</td>
+                                    <td style="text-align: center; width: 8rem;"><a href="{% url 'ticket-details' ticket.pk %}">View Details</a></td>
+                                </tr>         
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+    

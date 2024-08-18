@@ -1,0 +1,110 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<section class="container mt-5">
+    <div class="p-5 mb-4 bg-light rounded-3">
+        <div class="container-fluid py-5">
+            {% if request.user.is_engineer %}
+            <h1 class="display-5 fw-bold">Engineer Dashboard</h1>
+            {% elif request.user.is_customer %}
+            <h1 class="display-5 fw-bold">Customer Dashboard</h1>
+            {% endif %}
+            <br>
+            <h4 class="display-9 fw text-center"><u>Ticket Status Overview</u></h4>
+            <br>
+            <div class="d-flex justify-content-center">
+                <div class="d-flex flex-row justify-content-around align-items-center" style="width: 100%;">
+                    <div style="max-width: 400px;">
+                        <canvas id="myPieChart"></canvas>
+                    </div>
+                    <div style="max-width: 600px;">
+                        <canvas id="myBarChart" style="height: 500px;"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Pie Chart
+        var pieCtx = document.getElementById('myPieChart').getContext('2d');
+        var pieData = {{ pie_data|safe }};  // Ensure safe output of the data
+
+        var pieChart = new Chart(pieCtx, {
+            type: 'pie',
+            data: {
+                labels: pieData.labels,
+                datasets: [{
+                    label: 'Ticket Status',
+                    data: pieData.values,
+                    backgroundColor: [
+                        'rgba(255, 99, 132, 0.2)',
+                        'rgba(255, 206, 86, 0.2)',
+                        'rgba(75, 192, 192, 0.2)'
+                    ],
+                    borderColor: [
+                        'rgba(255, 99, 132, 1)',
+                        'rgba(255, 206, 86, 1)',
+                        'rgba(75, 192, 192, 1)'
+                    ],
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        position: 'top',
+                    },
+                    tooltip: {
+                        enabled: true
+                    }
+                }
+            }
+        });
+
+        // Bar Chart
+        var barCtx = document.getElementById('myBarChart').getContext('2d');
+        var barData = {{ bar_data|safe }};  // Ensure safe output of the data
+
+        var maxTicketsResolved = Math.max(...barData.values);
+        var yAxisMax = maxTicketsResolved + 4; // Increase max value by 4 for better visual spacing
+
+        var barChart = new Chart(barCtx, {
+            type: 'bar',
+            data: {
+                labels: barData.labels,
+                datasets: [{
+                    label: 'Tickets Resolved',
+                    data: barData.values,
+                    backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                    borderColor: 'rgba(54, 162, 235, 1)',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        max: yAxisMax // Set the max value here
+                    }
+                },
+                plugins: {
+                    legend: {
+                        position: 'top',
+                    },
+                    tooltip: {
+                        enabled: true
+                    }
+                }
+            }
+        });
+    });
+</script>
+
+{% endblock %}
